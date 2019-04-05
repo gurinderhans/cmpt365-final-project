@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket demo</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+  </head>
+  <body>
+    <input type="file" name="wav_file" />
+    
+    <br/><br/>
+    
+    <div style="border: 1px dashed gray">
+      <button id="saveAudio">Export file</button>
+      <button id="audio_playpause">Play/Pause</button>
+      <div id="waveform"></div>
+      <div id="myChart"></div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
