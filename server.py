@@ -87,6 +87,27 @@ async def time(websocket, path):
         "value": [newBytesb64, freqPlotDataStr]
       }))
 
+    elif jmsg["key"] == "wav_file_volume":
+      rate, arr = Current_Wav_File
+
+      arr = np.array(map(lambda x: x-20, arr))
+      datafft = np.fft.fft(arr)
+
+      Current_Wav_file = rate, arr
+
+      freqPlotData = np.abs(datafft)
+      freqPlotDataStr = json.dumps(freqPlotData.tolist())
+
+      moddedBytes = io.BytesIO()
+      write(moddedBytes, rate, arr)
+
+      newBytesb64 = base64.b64encode(moddedBytes.getvalue()).decode('utf-8')
+
+      await websocket.send(json.dumps({
+        "key":"wave_data", 
+        "value": [newBytesb64, freqPlotDataStr]
+      }))
+
 
 start_server = websockets.serve(time, '0.0.0.0', 8080)
 

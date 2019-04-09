@@ -41,8 +41,6 @@ function str2ab(str) {
   return buf;
 }
 
-
-
 let ws = new WebSocket("ws://127.0.0.1:8080/")
 ws.onopen = function() {
   ws.send('{"key":"msg","value":"socket open!"}');
@@ -66,6 +64,28 @@ $("#slider").slider({
 $("#slider").on("slidestop", function(event, ui) {
   const sliderPos = ui.value;
   ws.send(JSON.stringify({key: 'wav_file_change_pitch', value: sliderPos}));
+  $("#slider").slider('value', 0)
+  sliderTooltip(null, {value: 0})
+})
+
+function sliderTooltip(event, ui) {
+    var curValue = ui.value || 0;
+    var tooltip = '<div class="tooltip"><div class="tooltip-inner">' + curValue + '</div><div class="tooltip-arrow"></div></div>';
+    $('.ui-slider-handle').html(tooltip);
+}
+
+$("#slider2").slider({
+  value: 0,
+  min: 0,
+  max: 100,
+  step: 1,
+  create: sliderTooltip,
+  slide: sliderTooltip
+});
+
+$("#slider2").on("slidestop", function(event, ui) {
+  const slider2Pos = ui.value;
+  ws.send(JSON.stringify({key: 'wav_file_volume', value: slider2Pos}));
   $("#slider").slider('value', 0)
   sliderTooltip(null, {value: 0})
 })
