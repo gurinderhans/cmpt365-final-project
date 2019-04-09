@@ -63,6 +63,30 @@ async def time(websocket, path):
         "key":"wave_data", 
         "value": [newBytesb64, freqPlotDataStr]
       }))
+    
+    elif jmsg["key"] == "wav_file_change_pitch":
+      rate, arr = Current_Wav_File
+      datafft = np.fft.fft(arr)
+      print(jmsg["value"], type(jmsg["value"]))
+      datafft = np.roll(datafft, jmsg["value"])
+
+      recovered_signal = np.fft.ifft(datafft).astype('int16')
+
+      Current_Wav_File = rate, recovered_signal
+
+      freqPlotData = np.abs(datafft)
+      freqPlotDataStr = json.dumps(freqPlotData.tolist())
+
+      moddedBytes = io.BytesIO()
+      write(moddedBytes, rate, recovered_signal)
+
+      newBytesb64 = base64.b64encode(moddedBytes.getvalue()).decode('utf-8')
+
+      await websocket.send(json.dumps({
+        "key":"wave_data", 
+        "value": [newBytesb64, freqPlotDataStr]
+      }))
+
 
 start_server = websockets.serve(time, '0.0.0.0', 8080)
 

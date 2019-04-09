@@ -4,12 +4,16 @@ const wavesurfer = WaveSurfer.create({
   waveColor: 'blue',
   progressColor: 'lightblue'
 });
+wavesurfer.on('ready', function() {
+  document.querySelector("div#wavesurfer-controls").style="display: block";
+})
 
 var saveFileButton = document.getElementById("saveAudio");
 saveFileButton.onclick = function(ev) {
   let graphData = document.getElementById('myChart').data;
   console.log(graphData)
 };
+
 
 var audioPlayPauseButton = document.getElementById("audio_playpause");
 audioPlayPauseButton.onclick = function(ev) {
@@ -44,6 +48,28 @@ ws.onopen = function() {
   ws.send('{"key":"msg","value":"socket open!"}');
 }
 
+function sliderTooltip(event, ui) {
+    var curValue = ui.value || 0;
+    var tooltip = '<div class="tooltip"><div class="tooltip-inner">' + curValue + '</div><div class="tooltip-arrow"></div></div>';
+    $('.ui-slider-handle').html(tooltip);
+}
+
+$("#slider").slider({
+  value: 0,
+  min: -1000,
+  max: 1000,
+  step: 100,
+  create: sliderTooltip,
+  slide: sliderTooltip
+});
+
+$("#slider").on("slidestop", function(event, ui) {
+  const sliderPos = ui.value;
+  ws.send(JSON.stringify({key: 'wav_file_change_pitch', value: sliderPos}));
+  $("#slider").slider('value', 0)
+  sliderTooltip(null, {value: 0})
+})
+
 ws.onmessage = function (evt) {
   const message = JSON.parse(evt.data)
 
@@ -61,7 +87,7 @@ ws.onmessage = function (evt) {
 
     const plotLayout = {
       hovermode:'closest',
-      title:'Frequency Spectrum'
+      title:'Frequency Spectrum (Click to remove frequency)'
     }
 
     Plotly.newPlot('myChart', [plotTrace], plotLayout)
@@ -72,7 +98,6 @@ ws.onmessage = function (evt) {
       ws.send(JSON.stringify({key: 'wav_file_freq_remove', value: removePoint}));
     })
   }
-
 }
 
 
